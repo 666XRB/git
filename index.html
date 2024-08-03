@@ -2,42 +2,155 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Reader</title>
     <link rel="stylesheet" href="css/styles.css">
     <script src="js/pdf.js"></script>
     <script src="js/pdf.worker.js"></script>
+    <script src="js/pdf-viewer.js" defer></script>
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            cursor: pointer; /* Makes the header look clickable */
+        }
+        header:hover {
+            background-color: #0056b3;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
         }
         .pdf-list {
             list-style-type: none;
+            padding: 0;
+            margin: 0;
         }
         .pdf-list li {
             margin: 10px 0;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .pdf-list a {
+            display: block;
+            padding: 15px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .pdf-list a:hover {
+            background-color: #e9ecef;
+            color: #0056b3;
         }
         iframe {
             width: 100%;
             height: 800px;
             border: none;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        @media (max-width: 768px) {
+            iframe {
+                height: 600px;
+            }
+        }
+        .footer {
+            margin: 20px 0;
+            padding: 10px;
+            text-align: center;
+        }
+        .time, .quote {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        .quote {
+            font-style: italic;
+            color: #555;
         }
     </style>
 </head>
 <body>
-    <h1>PDF Reader</h1>
-    <ul class="pdf-list">
-        <li><a href="pdfs/example.pdf" target="pdf-frame">example.pdf</a></li>
-    </ul>
-    <iframe name="pdf-frame"></iframe>
+    <header id="header">
+        <h1>Git->PDF</h1>
+    </header>
+    <div class="container">
+        <ul class="pdf-list" id="pdf-list">
+            <!-- PDF links will be dynamically added here -->
+        </ul>
+        <iframe name="pdf-frame"></iframe>
+    </div>
+    <div class="footer">
+        <div class="time" id="current-time"></div>
+        <div class="quote">"The only limit to our realization of tomorrow is our doubts of today." - Franklin D. Roosevelt</div>
+    </div>
 
     <script>
-        document.querySelectorAll('.pdf-list a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const url = this.getAttribute('href');
-                const iframe = document.querySelector('iframe');
-                iframe.src = url;
+        document.addEventListener('DOMContentLoaded', function() {
+            // PDF list data
+            const pdfFiles = [
+                "Git.pdf",
+            ];
+
+            // Container for PDF list
+            const pdfList = document.getElementById('pdf-list');
+            const iframe = document.querySelector('iframe');
+
+            // Function to add PDF links to the list
+            pdfFiles.forEach(file => {
+                const listItem = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = `pdfs/${file}`;
+                link.textContent = file;
+                link.target = "pdf-frame";
+                listItem.appendChild(link);
+                pdfList.appendChild(listItem);
             });
+
+            // Automatically click the first PDF link
+            if (pdfFiles.length > 0) {
+                const firstLink = pdfList.querySelector('a');
+                firstLink.click();
+            }
+
+            // Handle link clicks
+            document.querySelectorAll('.pdf-list a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const url = this.getAttribute('href');
+                    iframe.src = url;
+                });
+            });
+
+            // Set the default PDF to show
+            const defaultPdf = 'pdfs/Git.pdf';
+            iframe.src = defaultPdf;
+
+            // Function to update the current time every second
+            function updateTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                const timeString = `${hours}:${minutes}:${seconds}`;
+                document.getElementById('current-time').textContent = timeString;
+            }
+
+            // Update time every second
+            setInterval(updateTime, 1000);
+            updateTime(); // Initial call to set the time immediately
         });
     </script>
 </body>
